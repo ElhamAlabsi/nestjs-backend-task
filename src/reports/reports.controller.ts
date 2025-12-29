@@ -8,6 +8,7 @@ import { Users } from 'src/entities/users.entity';
 import { RolesGuard } from 'src/Guard/roles.guard';
 import { Roles } from 'src/decorator/roles.decorator';
 import { Role } from 'src/enums/role';
+import { serialize } from 'src/intercepters/serialize.interceptor';
 
 
 @Controller('reports')
@@ -16,13 +17,12 @@ export class ReportsController {
     constructor(private reportService: ReportsService) { }
 
     @Post()
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles(Role.User)
+    @UseGuards(AuthGuard)
+    @Roles(Role.Admin)
     createReport(@Body() body: createReportDto, @CurrentUser() user: Users) {
         console.log(user);
         return this.reportService.create(body, user);
     }
-
 
     @Get()
     getAllReports() {
@@ -30,6 +30,7 @@ export class ReportsController {
     }
 
     @Get('/:id')
+    @serialize(createReportDto)
     getReport(@Param('id') id: string) {
         return this.reportService.getOne(parseInt(id));
     }

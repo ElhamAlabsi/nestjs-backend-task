@@ -2,6 +2,10 @@
 
 
 export enum Role {
-    Admin = 'admin' ,
-    User = 'user'
+    Admin = 'admin',
+    Manager = 'manager',
+    User = 'user',
+    Driver = 'driver',
+    storeOwner = 'storeowner'
 }
+

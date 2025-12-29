@@ -33,6 +33,6 @@ export class Reports {
     @IsNumber()
     price: number;
 
-    @ManyToOne(() => Users, (user) => user.reports)
+    @ManyToOne(() => Users, (user) => user.report)
     user: Users;
 }

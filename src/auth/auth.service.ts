@@ -2,26 +2,25 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt';
-import { Role } from 'src/enums/role';
+
 
 @Injectable()
 export class AuthService {
-    private readonly saltRounds = 10;
 
     constructor(private userService: UsersService, private jwtService: JwtService) { }
 
     async signup(email: string, password: string, name: string) {
+        
         const user = await this.userService.getUserByEmail(email);
         if (user) {
             throw new BadRequestException('this email already used !');
         }
-        const hashPassword = await bcrypt.hash(password, this.saltRounds);
+        const hashPassword = await bcrypt.hash(password,bcrypt.genSaltSync(10));
 
         const newUser = await this.userService.CreateUser(email, hashPassword, name);
 
         const payload = { id: newUser.id , role: newUser.role};
         const token = this.jwtService.sign(payload);
-
         return { user: newUser, token };
     }
 
@@ -36,7 +35,7 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const payload = { id: user.id , role: user.role };
+        const payload = { id: user.id , role: user.role  };
         const token = this.jwtService.sign(payload);
 
         return { user, token };

@@ -51,4 +51,8 @@ export class ReportsService {
         }
         return this.repo.remove(report);
     }
+    getSpecificReports() {
+        
+
+    }
 }

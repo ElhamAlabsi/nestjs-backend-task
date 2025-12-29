@@ -1,14 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from 'src/entities/users.entity';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { config } from 'process';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { CurrentUserMiddleware } from 'src/Middlware/current-user-middileware';
 
 @Module({
   imports: [
@@ -27,5 +26,7 @@ import { ConfigModule } from '@nestjs/config';
   ],
   controllers: [UsersController],
   providers: [UsersService, AuthService],
+   exports: [UsersService, AuthService]
 })
-export class UsersModule { }
+
+export class UsersModule {}

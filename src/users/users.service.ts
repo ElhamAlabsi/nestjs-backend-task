@@ -4,17 +4,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { Users } from 'src/entities/users.entity';
 import { Role } from 'src/enums/role';
-
+import * as bcrypt from 'bcrypt'
+import { JwtService } from '@nestjs/jwt';
+import { hashPassword } from 'src/utils/password.util';
 @Injectable()
 export class UsersService {
 
-    constructor(@InjectRepository(Users) private repo: Repository<Users>) { }
+    constructor(@InjectRepository(Users) private repo: Repository<Users>, private jwtService: JwtService) { }
 
-    CreateUser(email: string, password: string , name :string) {
-        const user = this.repo.create({ email, password , name })
+    CreateUser(email: string, password: string, name: string) {
+        const user = this.repo.create({ email, password, name })
         return this.repo.save(user);
     }
-
     getAll() {
         return this.repo.find();
     }
@@ -28,6 +29,10 @@ export class UsersService {
         if (!user) {
             throw new NotFoundException('user not found');
         }
+        if (arr.password) {
+            arr.password = await hashPassword(arr.password);
+        }
+        console.log(arr);
         Object.assign(user, arr);
         return this.repo.save(user);
     }
@@ -42,5 +47,9 @@ export class UsersService {
 
     getUserByEmail(email: string) {
         return this.repo.findOneBy({ email })
+    }
+
+    getUserByUserId(userId: number) {
+        return this.repo.findOneBy({ id: userId });
     }
 }
