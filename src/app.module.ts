@@ -11,9 +11,20 @@ import { JwtModule } from '@nestjs/jwt';
 import { METHODS } from 'http';
 import { RequestModule } from './request/request.module';
 import { Request } from './entities/request.entity';
+import { SkipThrottle, Throttle, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { throttle } from 'rxjs';
+import path from 'path';
 
 @Module({
-  imports: [ConfigModule,
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+      expandVariables: true,
+      ignoreEnvFile: false,
+    }),
+
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigModule],
@@ -25,29 +36,30 @@ import { Request } from './entities/request.entity';
         },
       }),
     }),
-    TypeOrmModule.forFeature([Users]),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
-      expandVariables: true,
-      ignoreEnvFile: false,
-    }),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'sqlite' ,
+        type: 'sqlite',
         database: config.get<string>('DB_NAME'),
         entities: [Users, Reports, Request],
         synchronize: true,
       }),
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 20
+      }
+    ]),
+    TypeOrmModule.forFeature([Users]),
     UsersModule,
     ReportsModule,
     RequestModule,
   ],
   controllers: [],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+
 })
 
 export class AppModule implements NestModule {

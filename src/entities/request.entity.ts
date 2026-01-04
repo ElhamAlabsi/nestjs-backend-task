@@ -17,7 +17,7 @@ export class Request {
     @Column({ type: 'text', enum: RequestType })
     requestType: RequestType;
 
-    @Column({ type: 'text', enum: RequestStatus, default: RequestStatus.PENDING })
+    @Column({ type: 'text', enum: RequestStatus })
     status: RequestStatus;
 
     @Column({ type: 'text' })

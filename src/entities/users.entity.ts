@@ -27,7 +27,7 @@ export class Users {
     password: string;
 
     @IsString()
-    @Column({ default: Role.User })
+    @Column({ default: Role.Manager })
     role: Role
 
 

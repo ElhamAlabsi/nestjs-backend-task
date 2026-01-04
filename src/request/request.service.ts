@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { RequestStatus } from 'src/enums/request-status';
 import { UsersService } from 'src/users/users.service';
 import { UpdateRequestDto } from 'src/DTOS/Request_dto/update-request.dto';
+import { Users } from 'src/entities/users.entity';
 
 @Injectable()
 export class RequestService {
@@ -33,17 +34,18 @@ export class RequestService {
     }
 
     async getPendingRequests() {
-        return await this.repo
-            .createQueryBuilder('request')
-            .leftJoinAndSelect('request.user', 'user')
-            .where('request.status = :status', { status: RequestStatus.PENDING })
-            .orderBy('request.createdAt', 'DESC')
-            .getMany();
+        return await this.repo.find({
+            where: { status: RequestStatus.PENDING },
+            relations: ['user'],
+            order: { createdAt: 'DESC' },
+        })
     }
 
-    async UpdateRequest(requestId: string, dto: UpdateRequestDto) {
+
+
+    async UpdateRequest(requestId: number, dto: UpdateRequestDto) {
         const request = await this.repo.findOne({
-            where: { id: parseInt(requestId) },
+            where: { id: requestId},
             relations: ['user']
         });
 
@@ -63,8 +65,6 @@ export class RequestService {
         return this.repo.save(request);
 
     }
-
-
 
 
 }

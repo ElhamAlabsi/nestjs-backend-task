@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Body , Delete ,Param } from '@nestjs/common';
+import { Controller, Post, Get, Put, Body, Delete, Param } from '@nestjs/common';
 import { createReportDto } from 'src/DTOS/create-reports.dto';
 import { ReportsService } from './reports.service';
 import { UseGuards } from '@nestjs/common';
@@ -9,6 +9,7 @@ import { RolesGuard } from 'src/Guard/roles.guard';
 import { Roles } from 'src/decorator/roles.decorator';
 import { Role } from 'src/enums/role';
 import { serialize } from 'src/intercepters/serialize.interceptor';
+import { SkipThrottle } from '@nestjs/throttler';
 
 
 @Controller('reports')
@@ -18,18 +19,20 @@ export class ReportsController {
 
     @Post()
     @UseGuards(AuthGuard)
-    @Roles(Role.Admin)
+
     createReport(@Body() body: createReportDto, @CurrentUser() user: Users) {
         console.log(user);
         return this.reportService.create(body, user);
     }
 
     @Get()
+    @SkipThrottle()
     getAllReports() {
         return this.reportService.getAll();
     }
 
     @Get('/:id')
+    @SkipThrottle()
     @serialize(createReportDto)
     getReport(@Param('id') id: string) {
         return this.reportService.getOne(parseInt(id));

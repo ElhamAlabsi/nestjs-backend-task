@@ -25,8 +25,6 @@ export class UsersController {
     }
 
     @Post('/signin')
-    @UseGuards( RolesGuard)
-    @Roles(Role.Admin, Role.Manager, Role.User)
     signin(@Body() body: signinDto) {
         return this.authservice.signIn(body.email, body.password);
     }

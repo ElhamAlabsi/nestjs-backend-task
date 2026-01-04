@@ -7,6 +7,7 @@ import { RolesGuard } from 'src/Guard/roles.guard';
 import { Roles } from 'src/decorator/roles.decorator';
 import { Role } from 'src/enums/role';
 import { UpdateRequestDto } from 'src/DTOS/Request_dto/update-request.dto';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @Controller('request')
 export class RequestController {
@@ -23,11 +24,12 @@ export class RequestController {
     @Roles(Role.Manager, Role.Admin)
     @UseGuards(AuthGuard, RolesGuard)
     getAllRequest() {
-        return this.requestService.getAllRequest();
+                return this.requestService.getAllRequest();
     }
 
 
     @Get()
+    @SkipThrottle()
     @Roles(Role.Manager, Role.Admin)
     @UseGuards(AuthGuard, RolesGuard)
     getPendingRequests() {
@@ -36,9 +38,10 @@ export class RequestController {
 
 
     @Patch('/:id')
+    @Throttle({ default: { limit: 5, ttl: 60 } })
     @Roles(Role.Manager, Role.Admin)
     @UseGuards(AuthGuard, RolesGuard)
-    updateRequest(@Param('id' ,  ParseIntPipe) id: string, @Body() body : UpdateRequestDto) {
-        return this.requestService.UpdateRequest((id), body);
+    updateRequest(@Param('id') id: string, @Body() body: UpdateRequestDto) {
+        return this.requestService.UpdateRequest(parseInt(id), body);
     }
 }
